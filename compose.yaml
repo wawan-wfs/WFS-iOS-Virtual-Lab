@@ -1,0 +1,28 @@
+services:
+  lab:
+    build: .
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6080:8080"
+    environment:
+      FIRMWARE_DIR: /data/firmware
+      MAX_UPLOAD_MB: "12000"
+    read_only: true
+    volumes:
+      - firmware_data:/data/firmware
+      - upload_temp:/tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/api/health',timeout=3)"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  firmware_data:
+  upload_temp:
